@@ -5,7 +5,10 @@ const mysql = require('mysql');
 
 // MySQL configuration
 const connection = mysql.createConnection({
-
+  host: 'test-db.cemgmqk1r12v.us-east-1.rds.amazonaws.com',
+  user: 'admin',
+  password: 'infernape99',
+  database: 'test_db'
 });
 
 // Connect to MySQL
@@ -18,22 +21,22 @@ connection.connect((err) => {
 });
 
 // Employee model
-function Employee(id, first_name, last_name, email, phone) {
+function Employee(id, name, email, designation, phoneNumber) {
   this.id = id;
-  this.first_name = first_name;
-  this.last_name = last_name;
+  this.name = name;
   this.email = email;
-  this.phone = phone;
+  this.designation = designation;
+  this.phoneNumber = phoneNumber;
 }
 
 // Add Employee
 employeeRoute.route('/create').post((req, res, next) => {
   const employee = new Employee(
     null,
-    req.body.first_name,
-    req.body.last_name,
+    req.body.name,
     req.body.email,
-    req.body.phone
+    req.body.designation,
+    req.body.phoneNumber
   );
 
   connection.query('INSERT INTO employees SET ?', employee, (error, result) => {
@@ -52,7 +55,7 @@ employeeRoute.route('/').get((req, res, next) => {
       return next(error);
     } else {
       const employees = results.map((row) => {
-        return new Employee(row.id, row.first_name, row.last_name, row.email, row.phone);
+        return new Employee(row.id, row.name, row.email, row.designation, row.phoneNumber);
       });
       res.json(employees);
     }
@@ -68,7 +71,7 @@ employeeRoute.route('/read/:id').get((req, res, next) => {
       res.status(404).json({ message: 'Employee not found' });
     } else {
       const row = results[0];
-      const employee = new Employee(row.id, row.first_name, row.last_name, row.email, row.phone);
+      const employee = new Employee(row.id, row.name, row.email, row.designation, row.phoneNumber);
       res.json(employee);
     }
   });
@@ -78,10 +81,10 @@ employeeRoute.route('/read/:id').get((req, res, next) => {
 employeeRoute.route('/update/:id').put((req, res,next) => {
   const employee = new Employee(
     req.params.id,
-    req.body.first_name,
-    req.body.last_name,
+    req.body.name,
     req.body.email,
-    req.body.phone
+    req.body.designation,
+    req.body.phoneNumber
   );
 
   connection.query('UPDATE employees SET ? WHERE id = ?', [employee, req.params.id], (error, result) => {
